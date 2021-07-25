@@ -40,9 +40,9 @@ By default, the frontend will run on localhost:3000.
 In order to run tests navigate to the backend folder and run the following commands: 
 
 ```
-dropdb bookshelf_test
-createdb bookshelf_test
-psql bookshelf_test < books.psql
+dropdb trivia_test
+createdb trivia_test
+psql trivia_test < trivia.psql
 python test_flaskr.py
 ```
 
