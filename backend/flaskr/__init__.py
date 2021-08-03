@@ -52,7 +52,7 @@ def create_app(test_config=None):
       abort(404)
 
     return jsonify({
-        # 'success':True,
+        'success':True,
         'categories': formatted_categories,
       })
 
@@ -70,18 +70,14 @@ def create_app(test_config=None):
   '''
   @app.route('/questions')
   def get_questions():
-
     categories= Category.query.order_by(Category.id).all()
     formatted_categories={}
-    for category in categories:
-      formatted_categories[category.id]=category.type  
-      current_category=category.type
-  
+    current_category=""
+    for category1 in categories:
+      formatted_categories[category1.id]=category1.type  
+
     selection=Question.query.all()
-    if current_category:
-      selection=Question.query.filter(Question.category==category.id).all()
     current_questions= paginate_questions(request,selection)
-    
 
     if len(current_questions) ==0:
       abort(404)
@@ -90,7 +86,7 @@ def create_app(test_config=None):
       'success':True,
       'questions': current_questions,
       'total_questions': len(Question.query.all()),
-      'categories':[formatted_categories],
+      'categories':formatted_categories,
       'current_category': current_category
     })
 
@@ -101,26 +97,26 @@ def create_app(test_config=None):
   TEST: When you click the trash icon next to a question, the question will be removed.
   This removal will persist in the database and when you refresh the page. 
   '''
-  # @app.route('/questions/<int:question_id>',methods=['DELETE'])
-  # def delete_question(question_id):
-  #   try:
-  #     question=Question.query.filter(Question.id==question_id).one_or_none()
+  @app.route('/questions/<int:question_id>',methods=['DELETE'])
+  def delete_question(question_id):
+    try:
+      question=Question.query.filter(Question.id==question_id).one_or_none()
 
-  #     if question is None:
-  #       abort(404)
+      if question is None:
+        abort(404)
       
-  #     question.delete()
-  #     selection=Question.query.order_by(Question.id).all()
-  #     current_questions= paginate_questions(request,selection)
+      question.delete()
+      selection=Question.query.order_by(Question.id).all()
+      current_questions= paginate_questions(request,selection)
 
-  #     return jsonify({
-  #       'success':True,
-  #       'deleted': question_id,
-  #       'questions':current_questions,
-  #       'totalQuestions': len(Question.query.all())
-  #     })
-  #   except:
-  #     abort(400)
+      return jsonify({
+        'success':True,
+        'deleted': question_id,
+        'questions':current_questions,
+        'totalQuestions': len(Question.query.all())
+      })
+    except:
+      abort(400)
 
   '''
   @TODO: 
@@ -189,20 +185,20 @@ def create_app(test_config=None):
   categories in the left column will cause only questions of that 
   category to be shown. 
   '''
-  # @app.route('/categories/<int:category_id>/questions')
-  # def  get_questions_based_on_category(category_id):
-  #   selection=Question.query.filter(Question.category==category_id).all()
-  #   current_questions=paginate_questions(request,selection)
-  #   # formatted_questions = [question.format() for question in questions]
-  #   if len(current_questions)==0:
-  #     abort(404)
+  @app.route('/categories/<int:category_id>/questions')
+  def  get_questions_based_on_category(category_id):
+    selection=Question.query.filter(Question.category==category_id).all()
+    current_questions=paginate_questions(request,selection)
+    # formatted_questions = [question.format() for question in questions]
+    if len(current_questions)==0:
+      abort(404)
       
-  #   return jsonify({
-  #     'success':True,
-  #     'questions':current_questions,
-  #     'totalQuestions':len(Question.query.all()),
-  #     'currentCategory':category_id
-  #   })
+    return jsonify({
+      'success':True,
+      'questions':current_questions,
+      'totalQuestions':len(Question.query.all()),
+      'currentCategory':category_id
+    })
      
   '''
   @TODO: 
