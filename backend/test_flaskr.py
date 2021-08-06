@@ -63,9 +63,9 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(res.status_code,200)
         self.assertEqual(data['success'],True)
         self.assertTrue(len(data['questions']))
-        self.assertTrue(data['totalQuestions'])
+        self.assertTrue(data['total_questions'])
         self.assertTrue(data['categories'])
-        self.assertTrue(data['currentCategory'])
+        self.assertTrue(data['current_category'])
 
     def test_404_sent_requesting_beyond_valid_page(self):
         res = self.client().get('/questions?page=1000',json={'difficulty':2})
@@ -85,7 +85,7 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(res.status_code,200)
         self.assertEqual(data['success'],True)
         self.assertEqual(data['deleted'],4)
-        self.assertTrue(data['totalQuestions'],)
+        self.assertTrue(data['total_questions'],)
         self.assertTrue(len(data['questions']))
         self.assertEqual(question,None)
 
@@ -115,22 +115,43 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(data['message'], 'method not allowed')
 
     def test_get_question_search_with_results(self):
-        res =self.client().post('/questions',json={'search':'green'})
+        res =self.client().post('/questions',json={'searchTerm':'green'})
         data=json.loads(res.data)
 
         self.assertEqual(res.status_code,200)
         self.assertEqual(data['success'],True)
-        self.assertTrue(data['totalQuestions'])
+        self.assertTrue(data['total_questions'])
         self.assertEqual(len(data['questions']),10)
 
     def test_get_question_search_without_results(self):
-        res =self.client().post('/questions',json={'search':'applejacks'})
+        res =self.client().post('/questions',json={'searchTerm':'applejacks'})
         data=json.loads(res.data)
 
         self.assertEqual(res.status_code,200)
         self.assertEqual(data['success'],True)
-        self.assertEqual(data['totalQuestions'],0)
+        self.assertEqual(data['total_questions'],0)
         self.assertEqual(len(data['questions']),0)
+
+    def test_play_quiz(self):
+        new_quiz = {'previous_questions':[],'quiz_category':{'type':'Art','id':'2'}}
+        res = self.client().post('quizzes',json=new_quiz)
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code,200)
+        self.assertEqual(data['success'],True)
+        self.assertTrue(data['question'])
+
+    def test_play_quiz_fail(self):
+        new_quiz = {'previous_questions':[],'quiz_category':{'type':'Music','id':1}}
+        res = self.client().post('quizzes',json=new_quiz)
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code,400)
+        self.assertEqual(data['success'],False)
+        self.assertEqual(data['message'], 'Bad request')
+
+
+
 
 # Make the tests conveniently executable
 if __name__ == "__main__":
