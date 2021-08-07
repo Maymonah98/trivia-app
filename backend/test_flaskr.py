@@ -106,13 +106,15 @@ class TriviaTestCase(unittest.TestCase):
         self.assertTrue(data['created'])
         self.assertTrue(len(data['questions']))
       
-    def test_405_if_question_creation_not_allowed(self):
-        res = self.client().post('/questions', json=self.new_question)
+    def test_404_if_question_creation_not_found(self):
+        res = self.client().post('/questions/',json={})
         data = json.loads(res.data)
 
-        self.assertEqual(res.status_code, 405)
+        self.assertEqual(res.status_code,404)
         self.assertEqual(data['success'], False)
-        self.assertEqual(data['message'], 'method not allowed')
+        self.assertEqual(data['message'], 'Not found')
+
+       
 
     def test_get_question_search_with_results(self):
         res =self.client().post('/questions',json={'searchTerm':'green'})
@@ -121,7 +123,7 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(res.status_code,200)
         self.assertEqual(data['success'],True)
         self.assertTrue(data['total_questions'])
-        self.assertEqual(len(data['questions']),10)
+        self.assertTrue(len(data['questions']))
 
     def test_get_question_search_without_results(self):
         res =self.client().post('/questions',json={'searchTerm':'applejacks'})
@@ -134,7 +136,7 @@ class TriviaTestCase(unittest.TestCase):
 
     def test_play_quiz(self):
         new_quiz = {'previous_questions':[],'quiz_category':{'type':'Art','id':'2'}}
-        res = self.client().post('quizzes',json=new_quiz)
+        res = self.client().post('/quizzes',json=new_quiz)
         data = json.loads(res.data)
 
         self.assertEqual(res.status_code,200)
@@ -142,15 +144,12 @@ class TriviaTestCase(unittest.TestCase):
         self.assertTrue(data['question'])
 
     def test_play_quiz_fail(self):
-        new_quiz = {'previous_questions':[],'quiz_category':{'type':'Music','id':1}}
-        res = self.client().post('quizzes',json=new_quiz)
+        res = self.client().post('/quizzes',json={})
         data = json.loads(res.data)
 
         self.assertEqual(res.status_code,400)
         self.assertEqual(data['success'],False)
         self.assertEqual(data['message'], 'Bad request')
-
-
 
 
 # Make the tests conveniently executable
